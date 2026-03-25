@@ -1,17 +1,11 @@
 /* css code will go here */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     font-family: Arial, sans-serif;
-    background: #f5f5f5;
+    background: #f4f4f4;
 }
 
-/* Container */
+/* Layout */
 .container {
     width: 80%;
     margin: auto;
@@ -22,16 +16,15 @@ body {
 .navbar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     background: #222;
     color: white;
-    padding: 15px 40px;
+    padding: 15px 30px;
 }
 
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 20px;
+    gap: 15px;
 }
 
 .nav-links a {
@@ -39,22 +32,36 @@ body {
     text-decoration: none;
 }
 
-/* Posts */
+/* Posts Grid */
 .posts {
-    margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
 
+/* Post Card */
 .post-card {
     background: white;
     padding: 15px;
     border-radius: 8px;
 }
 
-.post-footer {
+.post-meta {
     display: flex;
     justify-content: space-between;
+    font-size: 12px;
+    margin: 10px 0;
+}
+
+/* Reactions */
+.reactions {
     margin-top: 10px;
+}
+
+.react-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-right: 5px;
 }
