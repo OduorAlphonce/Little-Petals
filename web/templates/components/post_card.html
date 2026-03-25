@@ -1,0 +1,16 @@
+{{ define "post_card" }}
+
+<div class="post-card">
+    <h2>{{ .Title }}</h2>
+    <p>{{ .Description }}</p>
+
+    <div class="post-meta">
+        <span>By {{ .Author }}</span>
+        <span>{{ .Type }}</span>
+    </div>
+
+    <a href="/post/{{ .ID }}">Read More</a>
+
+    {{ template "reaction_bar" . }}
+</div>
+{{end}}
