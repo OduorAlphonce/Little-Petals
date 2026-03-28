@@ -1,0 +1,12 @@
+{{ define "content"}}
+
+<h1>{{ .Title}}</h1>
+<p><em>Chapter {{ .ChapterNumber}}</em></p>
+
+<div class="chapter-content">
+    <p>{{ .Content}}</p>
+</div>
+
+<a href="/book/{{ .BookID }}">← Back to Book</a>
+
+{{ end }}
