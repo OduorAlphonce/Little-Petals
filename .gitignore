@@ -1,0 +1,21 @@
+# Environment files (never commit real credentials)
+.env
+.env.*
+!.env.example
+
+# Build output
+/bin/
+/little-petals
+*.exe
+
+# Logs
+*.log
+
+# User-uploaded content
+web/static/uploads/*
+!web/static/uploads/.gitkeep
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
