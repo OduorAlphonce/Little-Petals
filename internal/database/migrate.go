@@ -1,6 +1,7 @@
 package database
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
@@ -16,6 +17,8 @@ import (
 // advisory locks so that concurrent instances cannot apply migrations twice.
 const migrationLockKey int64 = 0x4c50544d
 
+var emptyChecksum = checksum(nil)
+
 const createMigrationsTable = `
 CREATE TABLE IF NOT EXISTS schema_migrations (
     version    TEXT PRIMARY KEY,
@@ -26,6 +29,7 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 // Migrate applies every pending .sql file from files in lexical order.
 // Each migration is executed atomically alongside its bookkeeping row. An
 // advisory lock prevents multiple server instances from racing each other.
+// Empty or whitespace-only files are skipped so placeholders are not prematurely recorded.
 //
 // It returns the versions that were applied during this call.
 func Migrate(ctx context.Context, db *sql.DB, files fs.FS) ([]string, error) {
@@ -74,8 +78,20 @@ func Migrate(ctx context.Context, db *sql.DB, files fs.FS) ([]string, error) {
 			return nil, fmt.Errorf("migrate: read %q: %w", version, err)
 		}
 
+		if len(bytes.TrimSpace(body)) == 0 {
+			continue
+		}
+
 		checksum := checksum(body)
 		if previous, ok := applied[version]; ok {
+			if previous == emptyChecksum && checksum != emptyChecksum {
+				// File was previously recorded while empty; apply migration and update recorded checksum.
+				if err := applyMigration(ctx, conn, version, string(body), checksum); err != nil {
+					return nil, err
+				}
+				newlyApplied = append(newlyApplied, version)
+				continue
+			}
 			if previous != checksum {
 				return nil, fmt.Errorf(
 					"migrate: %q was modified after it was applied (recorded checksum %s, current checksum %s)",
@@ -133,7 +149,10 @@ func applyMigration(ctx context.Context, conn *sql.Conn, version, body, checksum
 	}
 	if _, err := tx.ExecContext(
 		ctx,
-		"INSERT INTO schema_migrations (version, checksum) VALUES ($1, $2)",
+		`INSERT INTO schema_migrations (version, checksum, applied_at)
+         VALUES ($1, $2, CURRENT_TIMESTAMP)
+         ON CONFLICT (version) DO UPDATE
+         SET checksum = EXCLUDED.checksum, applied_at = EXCLUDED.applied_at`,
 		version,
 		checksum,
 	); err != nil {
