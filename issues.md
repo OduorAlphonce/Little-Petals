@@ -32,12 +32,12 @@ This document breaks down the 14-Day MVP Development Plan into actionable, GitHu
 We need to bootstrap the application's configuration loading system and verify database connectivity. PostgreSQL is chosen as the persistent storage layer. 
 
 #### 🛠️ Tasks
-- [ ] Implement [config.go](file:///home/aloduor/Little-Petals/internal/config/config.go) to read environment configurations (port, DB URI, static upload directories) from a local `.env` file.
-- [ ] Implement database connection pooling inside [database.go](file:///home/aloduor/Little-Petals/internal/database/database.go) using standard SQL driver connections.
-- [ ] Define DB tables in `web/migrations` files:
+- [x] Implement [config.go](file:///home/aloduor/Little-Petals/internal/config/config.go) to read environment configurations (port, DB URI, static upload directories) from a local `.env` file.
+- [x] Implement database connection pooling inside [database.go](file:///home/aloduor/Little-Petals/internal/database/database.go) using standard SQL driver connections.
+- [x] Define DB tables in `web/migrations` files:
     - `001_create_users.sql` (schema: id, name, email, password_hash, created_at)
     - `002_create_posts.sql` (schema: id, user_id, title, description, content, post_type, file_url, created_at)
-- [ ] Write a startup routine in [main.go](file:///home/aloduor/Little-Petals/cmd/server/main.go) to automatically execute pending SQL migrations.
+- [x] Write a startup routine in [main.go](file:///home/aloduor/Little-Petals/cmd/server/main.go) to automatically execute pending SQL migrations.
 
 #### ✅ Acceptance Criteria
 - Running `go run cmd/server/main.go` connects to the DB without errors.
