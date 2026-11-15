@@ -54,12 +54,12 @@ We need to bootstrap the application's configuration loading system and verify d
 Establish the Golang structs representing our database tables and write the CRUD interfaces (repositories) to fetch/persist data.
 
 #### 🛠️ Tasks
-- [ ] Define entity models in [user.go](file:///home/aloduor/Little-Petals/internal/models/user.go) and [post.go](file:///home/aloduor/Little-Petals/internal/models/post.go).
-- [ ] Create repository interfaces and SQL implementations in [user_repo.go](file:///home/aloduor/Little-Petals/internal/repository/user_repo.go):
+- [x] Define entity models in [user.go](file:///home/aloduor/Little-Petals/internal/models/user.go) and [post.go](file:///home/aloduor/Little-Petals/internal/models/post.go).
+- [x] Create repository interfaces and SQL implementations in [user_repo.go](file:///home/aloduor/Little-Petals/internal/repository/user_repo.go):
     - `Create(user *User)`
     - `FindByEmail(email string)`
     - `FindByID(id int)`
-- [ ] Create repository interfaces and SQL implementations in [post_repo.go](file:///home/aloduor/Little-Petals/internal/repository/post_repo.go):
+- [x] Create repository interfaces and SQL implementations in [post_repo.go](file:///home/aloduor/Little-Petals/internal/repository/post_repo.go):
     - `Create(post *Post)`
     - `FindByID(id int)`
     - `ListAll(filterType string)`
