@@ -110,12 +110,13 @@ func (r *PostgresUserRepository) CreateWithContext(ctx context.Context, user *mo
 	query := `
 		INSERT INTO users (name, email, password_hash, created_at)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, created_at
+		RETURNING id, created_at, updated_at
 	`
 
 	err := r.db.QueryRowContext(ctx, query, user.Name, user.Email, user.PasswordHash, createdAt).Scan(
 		&user.ID,
 		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -125,7 +126,6 @@ func (r *PostgresUserRepository) CreateWithContext(ctx context.Context, user *mo
 		return fmt.Errorf("user_repo: create: %w", err)
 	}
 
-	user.UpdatedAt = user.CreatedAt
 	return nil
 }
 
@@ -142,7 +142,7 @@ func (r *PostgresUserRepository) FindByEmailWithContext(ctx context.Context, ema
 	}
 
 	query := `
-		SELECT id, name, email, password_hash, created_at
+		SELECT id, name, email, password_hash, created_at, updated_at
 		FROM users
 		WHERE LOWER(email) = LOWER($1)
 	`
@@ -154,6 +154,7 @@ func (r *PostgresUserRepository) FindByEmailWithContext(ctx context.Context, ema
 		&user.Email,
 		&user.PasswordHash,
 		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -162,7 +163,6 @@ func (r *PostgresUserRepository) FindByEmailWithContext(ctx context.Context, ema
 		return nil, fmt.Errorf("user_repo: find by email: %w", err)
 	}
 
-	user.UpdatedAt = user.CreatedAt
 	return &user, nil
 }
 
@@ -178,7 +178,7 @@ func (r *PostgresUserRepository) FindByIDWithContext(ctx context.Context, id int
 	}
 
 	query := `
-		SELECT id, name, email, password_hash, created_at
+		SELECT id, name, email, password_hash, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
@@ -190,6 +190,7 @@ func (r *PostgresUserRepository) FindByIDWithContext(ctx context.Context, id int
 		&user.Email,
 		&user.PasswordHash,
 		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -198,6 +199,5 @@ func (r *PostgresUserRepository) FindByIDWithContext(ctx context.Context, id int
 		return nil, fmt.Errorf("user_repo: find by id: %w", err)
 	}
 
-	user.UpdatedAt = user.CreatedAt
 	return &user, nil
 }

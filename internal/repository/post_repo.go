@@ -111,7 +111,7 @@ func (r *PostgresPostRepository) CreateWithContext(ctx context.Context, post *mo
 	query := `
 		INSERT INTO posts (user_id, title, description, content, post_type, file_url, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, created_at
+		RETURNING id, created_at, updated_at
 	`
 
 	err := r.db.QueryRowContext(
@@ -124,7 +124,7 @@ func (r *PostgresPostRepository) CreateWithContext(ctx context.Context, post *mo
 		post.PostType,
 		post.FileURL,
 		createdAt,
-	).Scan(&post.ID, &post.CreatedAt)
+	).Scan(&post.ID, &post.CreatedAt, &post.UpdatedAt)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
@@ -133,7 +133,6 @@ func (r *PostgresPostRepository) CreateWithContext(ctx context.Context, post *mo
 		return fmt.Errorf("post_repo: create: %w", err)
 	}
 
-	post.UpdatedAt = post.CreatedAt
 	return nil
 }
 
@@ -149,7 +148,7 @@ func (r *PostgresPostRepository) FindByIDWithContext(ctx context.Context, id int
 	}
 
 	query := `
-		SELECT id, user_id, title, description, content, post_type, file_url, created_at
+		SELECT id, user_id, title, description, content, post_type, file_url, created_at, updated_at
 		FROM posts
 		WHERE id = $1
 	`
@@ -166,6 +165,7 @@ func (r *PostgresPostRepository) FindByIDWithContext(ctx context.Context, id int
 		&p.PostType,
 		&fileURL,
 		&p.CreatedAt,
+		&p.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -178,7 +178,6 @@ func (r *PostgresPostRepository) FindByIDWithContext(ctx context.Context, id int
 	p.Content = content.String
 	p.FileURL = fileURL.String
 	p.FilterType = p.PostType
-	p.UpdatedAt = p.CreatedAt
 
 	return &p, nil
 }
@@ -197,13 +196,13 @@ func (r *PostgresPostRepository) ListAllWithContext(ctx context.Context, filterT
 
 	if filter == "" || filter == "all" {
 		query = `
-			SELECT id, user_id, title, description, content, post_type, file_url, created_at
+			SELECT id, user_id, title, description, content, post_type, file_url, created_at, updated_at
 			FROM posts
 			ORDER BY created_at DESC
 		`
 	} else {
 		query = `
-			SELECT id, user_id, title, description, content, post_type, file_url, created_at
+			SELECT id, user_id, title, description, content, post_type, file_url, created_at, updated_at
 			FROM posts
 			WHERE LOWER(post_type) = LOWER($1)
 			ORDER BY created_at DESC
@@ -230,6 +229,7 @@ func (r *PostgresPostRepository) ListAllWithContext(ctx context.Context, filterT
 			&p.PostType,
 			&fileURL,
 			&p.CreatedAt,
+			&p.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("post_repo: scan post: %w", err)
 		}
@@ -237,7 +237,6 @@ func (r *PostgresPostRepository) ListAllWithContext(ctx context.Context, filterT
 		p.Content = content.String
 		p.FileURL = fileURL.String
 		p.FilterType = p.PostType
-		p.UpdatedAt = p.CreatedAt
 		posts = append(posts, &p)
 	}
 
@@ -260,7 +259,7 @@ func (r *PostgresPostRepository) ListByUserIDWithContext(ctx context.Context, us
 	}
 
 	query := `
-		SELECT id, user_id, title, description, content, post_type, file_url, created_at
+		SELECT id, user_id, title, description, content, post_type, file_url, created_at, updated_at
 		FROM posts
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -285,6 +284,7 @@ func (r *PostgresPostRepository) ListByUserIDWithContext(ctx context.Context, us
 			&p.PostType,
 			&fileURL,
 			&p.CreatedAt,
+			&p.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("post_repo: scan post: %w", err)
 		}
@@ -292,7 +292,6 @@ func (r *PostgresPostRepository) ListByUserIDWithContext(ctx context.Context, us
 		p.Content = content.String
 		p.FileURL = fileURL.String
 		p.FilterType = p.PostType
-		p.UpdatedAt = p.CreatedAt
 		posts = append(posts, &p)
 	}
 
